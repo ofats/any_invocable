@@ -1,4 +1,4 @@
-#include "invokable.h"
+#include "invocable.h"
 
 #include "catch/catch.h"
 
@@ -6,9 +6,7 @@
 
 namespace {
 
-int foo() {
-    return 5;
-}
+int foo() { return 5; }
 
 struct widget {
     int boo() { return foo(); }
@@ -75,7 +73,8 @@ TEST_CASE("Construction", "[any_invokable]") {
     SECTION("Construction from large object") {
         auto arr = std::array<int, 32>{};
         arr.fill(5);
-        auto f = inv_type{[arr] { return std::accumulate(arr.cbegin(), arr.cend(), 0); }};
+        auto f = inv_type{
+            [arr] { return std::accumulate(arr.cbegin(), arr.cend(), 0); }};
         require_non_empty(f);
         REQUIRE(f() == std::accumulate(arr.cbegin(), arr.cend(), 0));
     }
@@ -188,4 +187,5 @@ TEST_CASE("Swap and comparisons", "[any_invocable]") {
     }
 }
 
-// TODO(ofats): small vs. large tests, number of move,ctor,dtor test, move-only callable test,...
+// TODO(ofats): small vs. large tests, number of move,ctor,dtor test, move-only
+// callable test,...
