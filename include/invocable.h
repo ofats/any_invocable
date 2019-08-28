@@ -70,7 +70,7 @@ namespace std {
 
 namespace base {
 
-namespace detail {
+namespace any_detail {
 
 using buffer = std::aligned_storage_t<sizeof(void*) * 2, alignof(void*)>;
 
@@ -153,7 +153,7 @@ struct handler_traits {
                                        large_handler<T>>;
 };
 
-}  // namespace detail
+}  // namespace any_detail
 
 template <class Signature>
 class any_invocable;
@@ -162,13 +162,14 @@ template <class R, class... ArgTypes>
 class any_invocable<R(ArgTypes...)> {
     template <class T>
     using handler =
-        typename detail::handler_traits<R, ArgTypes...>::template handler<T>;
+        typename any_detail::handler_traits<R,
+                                            ArgTypes...>::template handler<T>;
 
-    using storage = detail::storage;
-    using action = detail::action;
-    using handle_func = void (*)(detail::action, detail::storage*,
-                                 detail::storage*);
-    using call_func = R (*)(detail::storage&, ArgTypes...);
+    using storage = any_detail::storage;
+    using action = any_detail::action;
+    using handle_func = void (*)(any_detail::action, any_detail::storage*,
+                                 any_detail::storage*);
+    using call_func = R (*)(any_detail::storage&, ArgTypes...);
 
 public:
     using result_type = R;
