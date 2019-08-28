@@ -304,12 +304,16 @@ bool operator!=(std::nullptr_t,
     return static_cast<bool>(f);
 }
 
+}  // namespace base
+
+namespace std {
+
 template <class R, class... ArgTypes>
-void swap(any_invocable<R(ArgTypes...)>& lhs,
-          any_invocable<R(ArgTypes...)>& rhs) noexcept {
+void swap(base::any_invocable<R(ArgTypes...)>& lhs,
+          base::any_invocable<R(ArgTypes...)>& rhs) noexcept {
     lhs.swap(rhs);
 }
 
-}  // namespace base
+}  // namespace std
 
 #endif  // _ANY_INVOKABLE_H_
