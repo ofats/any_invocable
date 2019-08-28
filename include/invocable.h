@@ -153,6 +153,15 @@ struct handler_traits {
                                        large_handler<T>>;
 };
 
+template <class T>
+struct is_in_place_type : std::false_type {};
+
+template <class T>
+struct is_in_place_type<std::in_place_type_t<T>> : std::true_type {};
+
+template <class T>
+inline constexpr auto is_in_place_type_v = is_in_place_type<T>::value;
+
 }  // namespace any_detail
 
 template <class Signature>
@@ -188,33 +197,33 @@ public:
     template <
         class F, class FDec = std::decay_t<F>,
         class = std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&
+                                 !any_detail::is_in_place_type_v<FDec> &&
+                                 std::is_constructible_v<FDec, F> &&
                                  std::is_move_constructible_v<FDec> &&
                                  std::is_invocable_r_v<R, FDec, ArgTypes...>>>
     any_invocable(F&& f) {
-        using hdl = handler<FDec>;
-        hdl::create(storage_, std::forward<F>(f));
-        handle_ = &hdl::handle;
-        call_ = &hdl::call;
+        create<FDec>(std::forward<F>(f));
     }
 
-    // TODO(ofats)
-#if 0
-    template <class T, class... Args>
+    template <
+        class T, class... Args, class VT = std::decay_t<T>,
+        class = std::enable_if_t<std::is_move_constructible_v<VT> &&
+                                 std::is_constructible_v<VT, Args...> &&
+                                 std::is_invocable_r_v<R, VT, ArgTypes...>>>
     explicit any_invocable(std::in_place_type_t<T>, Args&&... args) {
-        using hdl = handler<T>;
-        hdl::create(storage_, std::forward<Args>(args)...);
-        handle_ = hdl::handle_;
-        call_ = &hdl::call;
+        create<VT>(std::forward<Args>(args)...);
     }
 
-    template <class T, class U, class... Args>
-    explicit any_invocable(std::in_place_type_t<T>, std::initializer_list<U> il, Args&&... args) {
-        using hdl = handler<T>;
-        hdl::create(storage_, il, std::forward<Args>(args)...);
-        handle_ = hdl::handle_;
-        call_ = hdl::call_;
+    template <
+        class T, class U, class... Args, class VT = std::decay_t<T>,
+        class = std::enable_if_t<
+            std::is_move_constructible_v<VT> &&
+            std::is_constructible_v<VT, std::initializer_list<U>&, Args...> &&
+            std::is_invocable_r_v<R, VT, ArgTypes...>>>
+    explicit any_invocable(std::in_place_type_t<T>, std::initializer_list<U> il,
+                           Args&&... args) {
+        create<VT>(il, std::forward<Args>(args)...);
     }
-#endif
 
     any_invocable& operator=(any_invocable&& rhs) noexcept {
         any_invocable{std::move(rhs)}.swap(*this);
@@ -267,6 +276,14 @@ public:
     }
 
 private:
+    template <class F, class... Args>
+    void create(Args&&... args) {
+        using hdl = handler<F>;
+        hdl::create(storage_, std::forward<Args>(args)...);
+        handle_ = &hdl::handle;
+        call_ = &hdl::call;
+    }
+
     void destroy() noexcept {
         if (handle_) {
             handle_(action::destroy, &storage_, nullptr);

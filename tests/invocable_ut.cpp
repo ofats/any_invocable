@@ -12,6 +12,14 @@ struct widget {
     int boo() { return foo(); }
 };
 
+struct statefull_widget {
+    statefull_widget(int val) : value(val) {}
+    statefull_widget(std::initializer_list<int> il)
+        : value(std::accumulate(il.begin(), il.end(), 0)) {}
+    int operator()() { return value; }
+    int value = 0;
+};
+
 template <class R, class... ArgTypes>
 void require_empty(const base::any_invocable<R(ArgTypes...)>& f) {
     REQUIRE(!f);
@@ -72,11 +80,24 @@ TEST_CASE("Construction", "[any_invokable]") {
 
     SECTION("Construction from large object") {
         auto arr = std::array<int, 32>{};
-        arr.fill(5);
+        arr.fill(foo());
         auto f = inv_type{
             [arr] { return std::accumulate(arr.cbegin(), arr.cend(), 0); }};
         require_non_empty(f);
         REQUIRE(f() == std::accumulate(arr.cbegin(), arr.cend(), 0));
+    }
+
+    SECTION("Construction using in_place_type") {
+        auto f = inv_type{std::in_place_type<statefull_widget>, foo()};
+        require_non_empty(f);
+        REQUIRE(f() == foo());
+    }
+
+    SECTION("Construction using in_place_type and initializer_list") {
+        auto f = inv_type{std::in_place_type<statefull_widget>,
+                          {foo(), foo(), foo()}};
+        require_non_empty(f);
+        REQUIRE(f() == foo() * 3);
     }
 }
 
