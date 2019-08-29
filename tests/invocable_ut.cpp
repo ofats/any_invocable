@@ -99,6 +99,12 @@ TEST_CASE("Construction", "[any_invokable]") {
         require_non_empty(f);
         REQUIRE(f() == foo() * 3);
     }
+
+    SECTION("Construction from move-only callable") {
+        auto f = inv_type{[p = std::make_unique<int>(foo())] { return *p; }};
+        require_non_empty(f);
+        REQUIRE(f() == foo());
+    }
 }
 
 TEST_CASE("Assignment", "[any_invocable]") {
@@ -151,6 +157,12 @@ TEST_CASE("Assignment", "[any_invocable]") {
         f = std::ref(lmb);
         require_non_empty(f);
         REQUIRE(f() == lmb());
+    }
+
+    SECTION("Assignment of move-only callable") {
+        f = [p = std::make_unique<int>(foo())] { return *p; };
+        require_non_empty(f);
+        REQUIRE(f() == foo());
     }
 }
 
@@ -208,5 +220,4 @@ TEST_CASE("Swap and comparisons", "[any_invocable]") {
     }
 }
 
-// TODO(ofats): small vs. large tests, number of move,ctor,dtor test, move-only
-// callable test,...
+// TODO(ofats): small vs. large tests, number of move,ctor,dtor test,...
