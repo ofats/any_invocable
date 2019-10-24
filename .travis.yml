@@ -34,7 +34,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-8
-            - libstdc++6
+            - libstdc++-9-dev
 
     - env: MATRIX_EVAL="CC=clang-8 CXX=clang++-8" CXX_FLAGS="-g -stdlib=libc++ -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -Wall -Wextra -Werror" LINK_FLAGS="-stdlib=libc++ -fsanitize=address,leak,undefined"
       name: "Clang-8, libc++"
