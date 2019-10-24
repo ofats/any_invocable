@@ -1,6 +1,6 @@
 #include "invocable.h"
 
-#include "catch/catch.h"
+#include "catch2/catch.hpp"
 
 #include <numeric>
 
