@@ -3,6 +3,8 @@ One of possible implementations of std::any_invocable proposed in P0288R4: wg21.
 
 This paper proposes a conservative, move-only equivalent of std::function.
 
+### Current build
+[![Build Status](https://travis-ci.org/ofats/any_invocable.svg?branch=master)](https://travis-ci.org/ofats/any_invocable)
 
 ### Motivating Example
 Such a code:
