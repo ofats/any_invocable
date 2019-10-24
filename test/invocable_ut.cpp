@@ -21,14 +21,14 @@ struct statefull_widget {
 };
 
 template <class R, class... ArgTypes>
-void require_empty(const base::any_invocable<R(ArgTypes...)>& f) {
+void require_empty(const ofats::any_invocable<R(ArgTypes...)>& f) {
     REQUIRE(!f);
     REQUIRE(f == nullptr);
     REQUIRE(nullptr == f);
 }
 
 template <class R, class... ArgTypes>
-void require_non_empty(const base::any_invocable<R(ArgTypes...)>& f) {
+void require_non_empty(const ofats::any_invocable<R(ArgTypes...)>& f) {
     REQUIRE(f);
     REQUIRE(f != nullptr);
     REQUIRE(nullptr != f);
@@ -37,7 +37,7 @@ void require_non_empty(const base::any_invocable<R(ArgTypes...)>& f) {
 }  // namespace
 
 TEST_CASE("Construction", "[any_invokable]") {
-    using inv_type = base::any_invocable<int()>;
+    using inv_type = ofats::any_invocable<int()>;
 
     SECTION("Default construction") {
         auto f = inv_type{};
@@ -72,7 +72,7 @@ TEST_CASE("Construction", "[any_invokable]") {
     }
 
     SECTION("Construction from member function pointer") {
-        auto f = base::any_invocable<int(widget*)>{&widget::boo};
+        auto f = ofats::any_invocable<int(widget*)>{&widget::boo};
         widget w;
         require_non_empty(f);
         REQUIRE(f(&w) == foo());
@@ -108,7 +108,7 @@ TEST_CASE("Construction", "[any_invokable]") {
 }
 
 TEST_CASE("Assignment", "[any_invocable]") {
-    base::any_invocable<int()> f;
+    ofats::any_invocable<int()> f;
     require_empty(f);
 
     SECTION("Assignment of default constructed") {
@@ -144,7 +144,7 @@ TEST_CASE("Assignment", "[any_invocable]") {
     }
 
     SECTION("Assignment of member function pointer") {
-        base::any_invocable<int(widget*)> f;
+        ofats::any_invocable<int(widget*)> f;
         require_empty(f);
         f = &widget::boo;
         require_non_empty(f);
@@ -167,7 +167,7 @@ TEST_CASE("Assignment", "[any_invocable]") {
 }
 
 TEST_CASE("Swap and comparisons", "[any_invocable]") {
-    using inv_type = base::any_invocable<int()>;
+    using inv_type = ofats::any_invocable<int()>;
     auto func_inv = inv_type{foo};
     auto lmb_inv = inv_type{[] { return foo(); }};
     auto empty_inv1 = inv_type{};

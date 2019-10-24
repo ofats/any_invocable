@@ -68,7 +68,7 @@ namespace std {
 */
 // clang-format on
 
-namespace base {
+namespace ofats {
 
 namespace any_detail {
 
@@ -321,13 +321,13 @@ bool operator!=(std::nullptr_t,
     return static_cast<bool>(f);
 }
 
-}  // namespace base
+}  // namespace ofats
 
 namespace std {
 
 template <class R, class... ArgTypes>
-void swap(base::any_invocable<R(ArgTypes...)>& lhs,
-          base::any_invocable<R(ArgTypes...)>& rhs) noexcept {
+void swap(ofats::any_invocable<R(ArgTypes...)>& lhs,
+          ofats::any_invocable<R(ArgTypes...)>& rhs) noexcept {
     lhs.swap(rhs);
 }
 
