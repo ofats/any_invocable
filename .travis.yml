@@ -1,0 +1,56 @@
+sudo: required
+language: cpp
+os: linux
+dist: xenial
+
+
+matrix:
+  include:
+      # FIXME: need to use -fuse-ld=gold because of linker problem in gcc: https://stackoverflow.com/questions/50024731/ld-unrecognized-option-push-state-no-as-needed
+    - env: MATRIX_EVAL="CC=gcc-9 CXX=g++-9" CXX_FLAGS="-g -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -Wall -Wextra -Werror" LINK_FLAGS="-lasan -lubsan -fuse-ld=gold"
+      name: "GCC-9"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+
+    - env: MATRIX_EVAL="CC=gcc-8 CXX=g++-8" CXX_FLAGS="-g -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -Wall -Wextra -Werror" LINK_FLAGS="-lasan -lubsan -fuse-ld=gold"
+      name: "GCC-8"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+
+    - env: MATRIX_EVAL="CC=clang-8 CXX=clang++-8" CXX_FLAGS="-g -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -Wall -Wextra -Werror" LINK_FLAGS="-fsanitize=address,leak,undefined"
+      name: "Clang-8"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-8
+          packages:
+            - clang-8
+
+    - env: MATRIX_EVAL="CC=clang-8 CXX=clang++-8" CXX_FLAGS="-g -stdlib=libc++ -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -Wall -Wextra -Werror" LINK_FLAGS="-stdlib=libc++ -fsanitize=address,leak,undefined"
+      name: "Clang-8, libc++"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-8
+          packages:
+            - clang-8
+            - libc++-8-dev
+            - libc++abi-8-dev
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="${CXX_FLAGS}" -DCMAKE_EXE_LINKER_FLAGS="${LINK_FLAGS}"
+  - cmake --build . -j
+  - ctest --output-on-failure
