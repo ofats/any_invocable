@@ -2,6 +2,7 @@
 
 #include "catch2/catch.hpp"
 
+#include <array>
 #include <numeric>
 
 namespace {
