@@ -249,62 +249,87 @@ class any_invocable_impl {
 template <class Signature>
 class any_invocable;
 
-template <class R, class... ArgTypes>
-class any_invocable<R(ArgTypes...)>
-    : public any_detail::any_invocable_impl<R, false, ArgTypes...> {
-  using base_type = any_detail::any_invocable_impl<R, false, ArgTypes...>;
+#define OFATS_ANY_INVOCABLE_IMPL(cv, ref, noex, inv_quals)                     \
+  template <class R, class... ArgTypes>                                        \
+  class any_invocable<R(ArgTypes...) cv ref noexcept(noex)>                    \
+      : public any_detail::any_invocable_impl<R, noex, ArgTypes...> {          \
+    using base_type = any_detail::any_invocable_impl<R, noex, ArgTypes...>;    \
+                                                                               \
+   public:                                                                     \
+    using base_type::base_type;                                                \
+                                                                               \
+    template <class F, class FDec = std::decay_t<F>,                           \
+              class = std::enable_if_t<                                        \
+                  !std::is_same_v<FDec, any_invocable> &&                      \
+                  !any_detail::is_in_place_type_v<FDec> &&                     \
+                  std::is_constructible_v<FDec, F> &&                          \
+                  std::is_move_constructible_v<FDec> &&                        \
+                  std::is_invocable_r_v<R, FDec inv_quals, ArgTypes...> &&     \
+                  (!noex || std::is_nothrow_invocable_r_v<R, FDec inv_quals,   \
+                                                          ArgTypes...>)>>      \
+    any_invocable(F&& f) {                                                     \
+      base_type::template create<FDec>(std::forward<F>(f));                    \
+    }                                                                          \
+                                                                               \
+    template <class T, class... Args, class VT = std::decay_t<T>,              \
+              class = std::enable_if_t<                                        \
+                  std::is_move_constructible_v<VT> &&                          \
+                  std::is_constructible_v<VT, Args...> &&                      \
+                  std::is_invocable_r_v<R, VT inv_quals, ArgTypes...> &&       \
+                  (!noex || std::is_nothrow_invocable_r_v<R, VT inv_quals,     \
+                                                          ArgTypes...>)>>      \
+    explicit any_invocable(std::in_place_type_t<T>, Args&&... args) {          \
+      base_type::template create<VT>(std::forward<Args>(args)...);             \
+    }                                                                          \
+                                                                               \
+    template <                                                                 \
+        class T, class U, class... Args, class VT = std::decay_t<T>,           \
+        class = std::enable_if_t<                                              \
+            std::is_move_constructible_v<VT> &&                                \
+            std::is_constructible_v<VT, std::initializer_list<U>&, Args...> && \
+            std::is_invocable_r_v<R, VT inv_quals, ArgTypes...> &&             \
+            (!noex ||                                                          \
+             std::is_nothrow_invocable_r_v<R, VT inv_quals, ArgTypes...>)>>    \
+    explicit any_invocable(std::in_place_type_t<T>,                            \
+                           std::initializer_list<U> il, Args&&... args) {      \
+      base_type::template create<VT>(il, std::forward<Args>(args)...);         \
+    }                                                                          \
+                                                                               \
+    template <class F, class FDec = std::decay_t<F>>                           \
+    std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&                   \
+                         std::is_move_constructible_v<FDec>,                   \
+                     any_invocable&>                                           \
+    operator=(F&& f) {                                                         \
+      any_invocable{std::forward<F>(f)}.swap(*this);                           \
+      return *this;                                                            \
+    }                                                                          \
+    template <class F>                                                         \
+    any_invocable& operator=(std::reference_wrapper<F> f) {                    \
+      any_invocable{f}.swap(*this);                                            \
+      return *this;                                                            \
+    }                                                                          \
+                                                                               \
+    R operator()(ArgTypes... args) cv ref noexcept(noex) {                     \
+      return base_type::call(std::forward<ArgTypes>(args)...);                 \
+    }                                                                          \
+  };
 
- public:
-  using base_type::base_type;
-
-  template <
-      class F, class FDec = std::decay_t<F>,
-      class = std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&
-                               !any_detail::is_in_place_type_v<FDec> &&
-                               std::is_constructible_v<FDec, F> &&
-                               std::is_move_constructible_v<FDec> &&
-                               std::is_invocable_r_v<R, FDec, ArgTypes...>>>
-  any_invocable(F&& f) {
-      base_type::template create<FDec>(std::forward<F>(f));
-  }
-
-  template <class T, class... Args, class VT = std::decay_t<T>,
-            class = std::enable_if_t<std::is_move_constructible_v<VT> &&
-                                     std::is_constructible_v<VT, Args...> &&
-                                     std::is_invocable_r_v<R, VT, ArgTypes...>>>
-  explicit any_invocable(std::in_place_type_t<T>, Args&&... args) {
-      base_type::template create<VT>(std::forward<Args>(args)...);
-  }
-
-  template <
-      class T, class U, class... Args, class VT = std::decay_t<T>,
-      class = std::enable_if_t<
-          std::is_move_constructible_v<VT> &&
-          std::is_constructible_v<VT, std::initializer_list<U>&, Args...> &&
-          std::is_invocable_r_v<R, VT, ArgTypes...>>>
-  explicit any_invocable(std::in_place_type_t<T>, std::initializer_list<U> il,
-                         Args&&... args) {
-      base_type::template create<VT>(il, std::forward<Args>(args)...);
-  }
-
-  template <class F, class FDec = std::decay_t<F>>
-  std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&
-                       std::is_move_constructible_v<FDec>,
-                   any_invocable&>
-  operator=(F&& f) {
-    any_invocable{std::forward<F>(f)}.swap(*this);
-    return *this;
-  }
-  template <class F>
-  any_invocable& operator=(std::reference_wrapper<F> f) {
-    any_invocable{f}.swap(*this);
-    return *this;
-  }
-
-  R operator()(ArgTypes... args) {
-    return base_type::call(std::forward<ArgTypes>(args)...);
-  }
-};
+// cv -> {`empty`, const}
+// ref -> {`empty`, &, &&}
+// noex -> {true, false}
+// inv_quals -> (is_empty(ref) ? & : ref)
+OFATS_ANY_INVOCABLE_IMPL(, , false, &);               // 000
+OFATS_ANY_INVOCABLE_IMPL(, , true, &);                // 001
+OFATS_ANY_INVOCABLE_IMPL(, &, false, &);              // 010
+OFATS_ANY_INVOCABLE_IMPL(, &, true, &);               // 011
+OFATS_ANY_INVOCABLE_IMPL(, &&, false, &&);            // 020
+OFATS_ANY_INVOCABLE_IMPL(, &&, true, &&);             // 021
+OFATS_ANY_INVOCABLE_IMPL(const, , false, const&);     // 100
+OFATS_ANY_INVOCABLE_IMPL(const, , true, const&);      // 101
+OFATS_ANY_INVOCABLE_IMPL(const, &, false, const&);    // 110
+OFATS_ANY_INVOCABLE_IMPL(const, &, true, const&);     // 111
+OFATS_ANY_INVOCABLE_IMPL(const, &&, false, const&&);  // 120
+OFATS_ANY_INVOCABLE_IMPL(const, &&, true, const&&);   // 121
 
 }  // namespace ofats
 
