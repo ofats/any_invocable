@@ -7,26 +7,25 @@
 
 // clang-format off
 /*
-  any_invocable synopsis
-
 namespace std {
+  template<class Sig> class any_invocable; // never defined
 
   template<class R, class... ArgTypes>
-  class any_invocable<R(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL)> {
+  class any_invocable<R(ArgTypes...) cv ref noexcept(noex)> {
   public:
     using result_type = R;
 
-    // 20.14.16.2.1, construct/copy/destroy
+    // SECTION.3, construct/copy/destroy
     any_invocable() noexcept;
     any_invocable(nullptr_t) noexcept;
     any_invocable(any_invocable&&) noexcept;
     template<class F> any_invocable(F&&);
 
     template<class T, class... Args>
-    explicit any_invocable(in_place_type_t<T>, Args&&...);
+      explicit any_invocable(in_place_type_t<T>, Args&&...);
     template<class T, class U, class... Args>
-    explicit any_invocable(in_place_type_t<T>, initializer_list<U>, Args&&...);
-                                                    
+      explicit any_invocable(in_place_type_t<T>, initializer_list<U>, Args&&...);
+
     any_invocable& operator=(any_invocable&&) noexcept;
     any_invocable& operator=(nullptr_t) noexcept;
     template<class F> any_invocable& operator=(F&&);
@@ -34,37 +33,22 @@ namespace std {
 
     ~any_invocable();
 
-    // 20.14.16.2.2, any_invocable modifiers
+    // SECTION.4, any_invocable modifiers
     void swap(any_invocable&) noexcept;
 
-    // 20.14.16.2.3, any_invocable capacity
+    // SECTION.5, any_invocable capacity
     explicit operator bool() const noexcept;
 
-    // 20.14.16.2.4, any_invocable invocation
-    R operator()(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL);
+    // SECTION.6, any_invocable invocation
+    R operator()(ArgTypes...) cv ref noexcept(noex);
+
+    // SECTION.7, null pointer comparisons
+    friend bool operator==(const any_invocable&, nullptr_t) noexcept;
+
+    // SECTION.8, specialized algorithms
+    friend void swap(any_invocable&, any_invocable&) noexcept;
   };
-
-
-  // 20.14.16.2.6, Null pointer comparisons
-  template<class R, class... ArgTypes>
-    bool operator==(const any_invocable<R(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL)>&, nullptr_t) noexcept;
-
-  template<class R, class... ArgTypes>
-    bool operator==(nullptr_t, const any_invocable<R(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL)>&) noexcept;
-
-  template<class R, class... ArgTypes>
-    bool operator!=(const any_invocable<R(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL)>&, nullptr_t) noexcept;
-
-  template<class R, class... ArgTypes>
-    bool operator!=(nullptr_t, const any_invocable<R(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL)>&) noexcept;
-
-  // 20.14.16.2.7, specialized algorithms
-  template<class R, class... ArgTypes>
-    void swap(any_invocable<R(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL)>&,
-        any_invocable<R(ArgTypes...) QUAL_OPT noexcept(NOEXCEPT_VAL)>&) noexcept;
-
-}  // std
-
+}
 */
 // clang-format on
 
