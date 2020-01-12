@@ -253,6 +253,23 @@ class any_invocable<R(ArgTypes...)> {
     return call_(storage_, std::forward<ArgTypes>(args)...);
   }
 
+  friend bool operator==(const any_invocable& f, std::nullptr_t) noexcept {
+    return !f;
+  }
+  friend bool operator==(std::nullptr_t, const any_invocable& f) noexcept {
+    return !f;
+  }
+  friend bool operator!=(const any_invocable& f, std::nullptr_t) noexcept {
+    return static_cast<bool>(f);
+  }
+  friend bool operator!=(std::nullptr_t, const any_invocable& f) noexcept {
+    return static_cast<bool>(f);
+  }
+
+  friend void swap(any_invocable& lhs, any_invocable& rhs) noexcept {
+    lhs.swap(rhs);
+  }
+
  private:
   template <class F, class... Args>
   void create(Args&&... args) {
@@ -275,40 +292,6 @@ class any_invocable<R(ArgTypes...)> {
   call_func call_;
 };
 
-template <class R, class... ArgTypes>
-bool operator==(const any_invocable<R(ArgTypes...)>& f,
-                std::nullptr_t) noexcept {
-  return !f;
-}
-
-template <class R, class... ArgTypes>
-bool operator==(std::nullptr_t,
-                const any_invocable<R(ArgTypes...)>& f) noexcept {
-  return !f;
-}
-
-template <class R, class... ArgTypes>
-bool operator!=(const any_invocable<R(ArgTypes...)>& f,
-                std::nullptr_t) noexcept {
-  return static_cast<bool>(f);
-}
-
-template <class R, class... ArgTypes>
-bool operator!=(std::nullptr_t,
-                const any_invocable<R(ArgTypes...)>& f) noexcept {
-  return static_cast<bool>(f);
-}
-
 }  // namespace ofats
-
-namespace std {
-
-template <class R, class... ArgTypes>
-void swap(ofats::any_invocable<R(ArgTypes...)>& lhs,
-          ofats::any_invocable<R(ArgTypes...)>& rhs) noexcept {
-  lhs.swap(rhs);
-}
-
-}  // namespace std
 
 #endif  // _ANY_INVOKABLE_H_
