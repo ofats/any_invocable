@@ -220,4 +220,5 @@ TEST_CASE("Swap and comparisons", "[any_invocable]") {
   }
 }
 
-// TODO(ofats): small vs. large tests, number of move,ctor,dtor test,...
+// TODO(ofats): small vs. large tests, number of move,ctor,dtor test,
+// ill/well-formed checks...

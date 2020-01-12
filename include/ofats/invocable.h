@@ -142,13 +142,8 @@ struct is_in_place_type<std::in_place_type_t<T>> : std::true_type {};
 template <class T>
 inline constexpr auto is_in_place_type_v = is_in_place_type<T>::value;
 
-}  // namespace any_detail
-
-template <class Signature>
-class any_invocable;
-
-template <class R, class... ArgTypes>
-class any_invocable<R(ArgTypes...)> {
+template <class R, bool is_noexcept, class... ArgTypes>
+class any_invocable_impl {
   template <class T>
   using handler =
       typename any_detail::handler_traits<R, ArgTypes...>::template handler<T>;
@@ -162,10 +157,9 @@ class any_invocable<R(ArgTypes...)> {
  public:
   using result_type = R;
 
- public:
-  any_invocable() noexcept = default;
-  any_invocable(std::nullptr_t) noexcept {}
-  any_invocable(any_invocable&& rhs) noexcept {
+  any_invocable_impl() noexcept = default;
+  any_invocable_impl(std::nullptr_t) noexcept {}
+  any_invocable_impl(any_invocable_impl&& rhs) noexcept {
     if (rhs.handle_) {
       handle_ = rhs.handle_;
       handle_(action::move, &storage_, &rhs.storage_);
@@ -173,61 +167,19 @@ class any_invocable<R(ArgTypes...)> {
       rhs.handle_ = nullptr;
     }
   }
-  template <
-      class F, class FDec = std::decay_t<F>,
-      class = std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&
-                               !any_detail::is_in_place_type_v<FDec> &&
-                               std::is_constructible_v<FDec, F> &&
-                               std::is_move_constructible_v<FDec> &&
-                               std::is_invocable_r_v<R, FDec, ArgTypes...>>>
-  any_invocable(F&& f) {
-    create<FDec>(std::forward<F>(f));
-  }
 
-  template <class T, class... Args, class VT = std::decay_t<T>,
-            class = std::enable_if_t<std::is_move_constructible_v<VT> &&
-                                     std::is_constructible_v<VT, Args...> &&
-                                     std::is_invocable_r_v<R, VT, ArgTypes...>>>
-  explicit any_invocable(std::in_place_type_t<T>, Args&&... args) {
-    create<VT>(std::forward<Args>(args)...);
-  }
-
-  template <
-      class T, class U, class... Args, class VT = std::decay_t<T>,
-      class = std::enable_if_t<
-          std::is_move_constructible_v<VT> &&
-          std::is_constructible_v<VT, std::initializer_list<U>&, Args...> &&
-          std::is_invocable_r_v<R, VT, ArgTypes...>>>
-  explicit any_invocable(std::in_place_type_t<T>, std::initializer_list<U> il,
-                         Args&&... args) {
-    create<VT>(il, std::forward<Args>(args)...);
-  }
-
-  any_invocable& operator=(any_invocable&& rhs) noexcept {
-    any_invocable{std::move(rhs)}.swap(*this);
+  any_invocable_impl& operator=(any_invocable_impl&& rhs) noexcept {
+    any_invocable_impl{std::move(rhs)}.swap(*this);
     return *this;
   }
-  any_invocable& operator=(std::nullptr_t) noexcept {
+  any_invocable_impl& operator=(std::nullptr_t) noexcept {
     destroy();
     return *this;
   }
-  template <class F, class FDec = std::decay_t<F>>
-  std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&
-                       std::is_move_constructible_v<FDec>,
-                   any_invocable&>
-  operator=(F&& f) {
-    any_invocable{std::forward<F>(f)}.swap(*this);
-    return *this;
-  }
-  template <class F>
-  any_invocable& operator=(std::reference_wrapper<F> f) {
-    any_invocable{f}.swap(*this);
-    return *this;
-  }
 
-  ~any_invocable() { destroy(); }
+  ~any_invocable_impl() { destroy(); }
 
-  void swap(any_invocable& rhs) noexcept {
+  void swap(any_invocable_impl& rhs) noexcept {
     if (handle_) {
       if (rhs.handle_) {
         storage tmp;
@@ -249,28 +201,7 @@ class any_invocable<R(ArgTypes...)> {
 
   explicit operator bool() const noexcept { return handle_ != nullptr; }
 
-  R operator()(ArgTypes... args) {
-    return call_(storage_, std::forward<ArgTypes>(args)...);
-  }
-
-  friend bool operator==(const any_invocable& f, std::nullptr_t) noexcept {
-    return !f;
-  }
-  friend bool operator==(std::nullptr_t, const any_invocable& f) noexcept {
-    return !f;
-  }
-  friend bool operator!=(const any_invocable& f, std::nullptr_t) noexcept {
-    return static_cast<bool>(f);
-  }
-  friend bool operator!=(std::nullptr_t, const any_invocable& f) noexcept {
-    return static_cast<bool>(f);
-  }
-
-  friend void swap(any_invocable& lhs, any_invocable& rhs) noexcept {
-    lhs.swap(rhs);
-  }
-
- private:
+ protected:
   template <class F, class... Args>
   void create(Args&&... args) {
     using hdl = handler<F>;
@@ -286,10 +217,93 @@ class any_invocable<R(ArgTypes...)> {
     }
   }
 
+  R call(ArgTypes... args) noexcept(is_noexcept) {
+    return call_(storage_, std::forward<ArgTypes>(args)...);
+  }
+
+  friend bool operator==(const any_invocable_impl& f, std::nullptr_t) noexcept {
+    return !f;
+  }
+  friend bool operator==(std::nullptr_t, const any_invocable_impl& f) noexcept {
+    return !f;
+  }
+  friend bool operator!=(const any_invocable_impl& f, std::nullptr_t) noexcept {
+    return static_cast<bool>(f);
+  }
+  friend bool operator!=(std::nullptr_t, const any_invocable_impl& f) noexcept {
+    return static_cast<bool>(f);
+  }
+
+  friend void swap(any_invocable_impl& lhs, any_invocable_impl& rhs) noexcept {
+    lhs.swap(rhs);
+  }
+
  private:
   storage storage_;
   handle_func handle_ = nullptr;
   call_func call_;
+};
+
+}  // namespace any_detail
+
+template <class Signature>
+class any_invocable;
+
+template <class R, class... ArgTypes>
+class any_invocable<R(ArgTypes...)>
+    : public any_detail::any_invocable_impl<R, false, ArgTypes...> {
+  using base_type = any_detail::any_invocable_impl<R, false, ArgTypes...>;
+
+ public:
+  using base_type::base_type;
+
+  template <
+      class F, class FDec = std::decay_t<F>,
+      class = std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&
+                               !any_detail::is_in_place_type_v<FDec> &&
+                               std::is_constructible_v<FDec, F> &&
+                               std::is_move_constructible_v<FDec> &&
+                               std::is_invocable_r_v<R, FDec, ArgTypes...>>>
+  any_invocable(F&& f) {
+      base_type::template create<FDec>(std::forward<F>(f));
+  }
+
+  template <class T, class... Args, class VT = std::decay_t<T>,
+            class = std::enable_if_t<std::is_move_constructible_v<VT> &&
+                                     std::is_constructible_v<VT, Args...> &&
+                                     std::is_invocable_r_v<R, VT, ArgTypes...>>>
+  explicit any_invocable(std::in_place_type_t<T>, Args&&... args) {
+      base_type::template create<VT>(std::forward<Args>(args)...);
+  }
+
+  template <
+      class T, class U, class... Args, class VT = std::decay_t<T>,
+      class = std::enable_if_t<
+          std::is_move_constructible_v<VT> &&
+          std::is_constructible_v<VT, std::initializer_list<U>&, Args...> &&
+          std::is_invocable_r_v<R, VT, ArgTypes...>>>
+  explicit any_invocable(std::in_place_type_t<T>, std::initializer_list<U> il,
+                         Args&&... args) {
+      base_type::template create<VT>(il, std::forward<Args>(args)...);
+  }
+
+  template <class F, class FDec = std::decay_t<F>>
+  std::enable_if_t<!std::is_same_v<FDec, any_invocable> &&
+                       std::is_move_constructible_v<FDec>,
+                   any_invocable&>
+  operator=(F&& f) {
+    any_invocable{std::forward<F>(f)}.swap(*this);
+    return *this;
+  }
+  template <class F>
+  any_invocable& operator=(std::reference_wrapper<F> f) {
+    any_invocable{f}.swap(*this);
+    return *this;
+  }
+
+  R operator()(ArgTypes... args) {
+    return base_type::call(std::forward<ArgTypes>(args)...);
+  }
 };
 
 }  // namespace ofats
