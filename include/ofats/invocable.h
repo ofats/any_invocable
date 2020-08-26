@@ -249,7 +249,7 @@ class any_invocable_impl {
 template <class Signature>
 class any_invocable;
 
-#define OFATS_ANY_INVOCABLE_IMPL(cv, ref, noex, inv_quals)                     \
+#define __OFATS_ANY_INVOCABLE(cv, ref, noex, inv_quals)                        \
   template <class R, class... ArgTypes>                                        \
   class any_invocable<R(ArgTypes...) cv ref noexcept(noex)>                    \
       : public any_detail::any_invocable_impl<R, noex, ArgTypes...> {          \
@@ -318,18 +318,20 @@ class any_invocable;
 // ref -> {`empty`, &, &&}
 // noex -> {true, false}
 // inv_quals -> (is_empty(ref) ? & : ref)
-OFATS_ANY_INVOCABLE_IMPL(, , false, &);               // 000
-OFATS_ANY_INVOCABLE_IMPL(, , true, &);                // 001
-OFATS_ANY_INVOCABLE_IMPL(, &, false, &);              // 010
-OFATS_ANY_INVOCABLE_IMPL(, &, true, &);               // 011
-OFATS_ANY_INVOCABLE_IMPL(, &&, false, &&);            // 020
-OFATS_ANY_INVOCABLE_IMPL(, &&, true, &&);             // 021
-OFATS_ANY_INVOCABLE_IMPL(const, , false, const&);     // 100
-OFATS_ANY_INVOCABLE_IMPL(const, , true, const&);      // 101
-OFATS_ANY_INVOCABLE_IMPL(const, &, false, const&);    // 110
-OFATS_ANY_INVOCABLE_IMPL(const, &, true, const&);     // 111
-OFATS_ANY_INVOCABLE_IMPL(const, &&, false, const&&);  // 120
-OFATS_ANY_INVOCABLE_IMPL(const, &&, true, const&&);   // 121
+__OFATS_ANY_INVOCABLE(, , false, &);               // 000
+__OFATS_ANY_INVOCABLE(, , true, &);                // 001
+__OFATS_ANY_INVOCABLE(, &, false, &);              // 010
+__OFATS_ANY_INVOCABLE(, &, true, &);               // 011
+__OFATS_ANY_INVOCABLE(, &&, false, &&);            // 020
+__OFATS_ANY_INVOCABLE(, &&, true, &&);             // 021
+__OFATS_ANY_INVOCABLE(const, , false, const&);     // 100
+__OFATS_ANY_INVOCABLE(const, , true, const&);      // 101
+__OFATS_ANY_INVOCABLE(const, &, false, const&);    // 110
+__OFATS_ANY_INVOCABLE(const, &, true, const&);     // 111
+__OFATS_ANY_INVOCABLE(const, &&, false, const&&);  // 120
+__OFATS_ANY_INVOCABLE(const, &&, true, const&&);   // 121
+
+#undef __OFATS_ANY_INVOCABLE
 
 }  // namespace ofats
 
