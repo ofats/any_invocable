@@ -244,6 +244,18 @@ class any_invocable_impl {
   call_func call_;
 };
 
+template <class T>
+using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <class AI, class F, bool noex, class R, class FCall, class... ArgTypes>
+using can_convert = std::conjunction<
+    std::negation<std::is_same<remove_cvref_t<F>, AI>>,
+    std::negation<any_detail::is_in_place_type<remove_cvref_t<F>>>,
+    std::is_invocable_r<R, FCall, ArgTypes...>,
+    std::bool_constant<(!noex ||
+                        std::is_nothrow_invocable_r_v<R, FCall, ArgTypes...>)>,
+    std::is_constructible<std::decay_t<F>, F>>;
+
 }  // namespace any_detail
 
 template <class Signature>
@@ -258,17 +270,12 @@ class any_invocable;
    public:                                                                     \
     using base_type::base_type;                                                \
                                                                                \
-    template <class F, class FDec = std::decay_t<F>,                           \
-              class = std::enable_if_t<                                        \
-                  !std::is_same_v<FDec, any_invocable> &&                      \
-                  !any_detail::is_in_place_type_v<FDec> &&                     \
-                  std::is_constructible_v<FDec, F> &&                          \
-                  std::is_move_constructible_v<FDec> &&                        \
-                  std::is_invocable_r_v<R, FDec inv_quals, ArgTypes...> &&     \
-                  (!noex || std::is_nothrow_invocable_r_v<R, FDec inv_quals,   \
-                                                          ArgTypes...>)>>      \
+    template <                                                                 \
+        class F,                                                               \
+        class = std::enable_if_t<any_detail::can_convert<                      \
+            any_invocable, F, noex, R, F inv_quals, ArgTypes...>::value>>      \
     any_invocable(F&& f) {                                                     \
-      base_type::template create<FDec>(std::forward<F>(f));                    \
+      base_type::template create<std::decay_t<F>>(std::forward<F>(f));         \
     }                                                                          \
                                                                                \
     template <class T, class... Args, class VT = std::decay_t<T>,              \
