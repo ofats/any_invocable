@@ -220,5 +220,10 @@ TEST_CASE("Swap and comparisons", "[any_invocable]") {
   }
 }
 
+TEST_CASE("Static checks", "[any_invocable]") {
+  STATIC_REQUIRE(!std::is_copy_constructible_v<ofats::any_invocable<void()>>);
+  STATIC_REQUIRE(std::is_move_constructible_v<ofats::any_invocable<void()>>);
+}
+
 // TODO(ofats): small vs. large tests, number of move,ctor,dtor test,
 // ill/well-formed checks...
