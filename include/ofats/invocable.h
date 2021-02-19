@@ -319,7 +319,7 @@ class any_invocable;
     R operator()(ArgTypes... args) cv ref noexcept(noex) {                     \
       return base_type::call(std::forward<ArgTypes>(args)...);                 \
     }                                                                          \
-  };
+  }
 
 // cv -> {`empty`, const}
 // ref -> {`empty`, &, &&}
