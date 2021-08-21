@@ -1,8 +1,8 @@
 #include <array>
+#include <catch2/catch_all.hpp>
 #include <numeric>
 
-#include "catch2/catch_all.hpp"
-#include "invocable.h"
+#include "ofats/invocable.h"
 
 namespace {
 

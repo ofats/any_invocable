@@ -2,3 +2,7 @@
 compile_commands.json
 build/
 Testing/
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-any_invocable
