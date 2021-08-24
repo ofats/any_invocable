@@ -41,6 +41,8 @@ jobs:
         key: bazel
 
     - name: Bazel build
+      env:
+        CC: ${{cxx}}
       run: bazel build ... -c ${{matrix.build_type}}
 
     - name: Bazel test
