@@ -54,11 +54,11 @@ jobs:
 
     - uses: bazelbuild/setup-bazelisk@v1
 
-    - name: Mount bazel cache  # Optional
-      uses: actions/cache@v2
-      with:
-        path: "~/.cache/bazel"
-        key: bazel
+      #- name: Mount bazel cache  # Optional
+      #  uses: actions/cache@v2
+      #  with:
+      #    path: "~/.cache/bazel"
+      #    key: bazel
 
     - name: Bazel build
       env:
