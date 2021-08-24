@@ -63,7 +63,7 @@ jobs:
     - name: Bazel build
       env:
         CXX: ${{matrix.cxx}}
-      run: bazel build ... -c ${{matrix.build_type}}
+      run: bazel build ... -s -c ${{matrix.build_type}}
 
     - name: Bazel test
-      run: bazel test ... -c ${{matrix.build_type}}
+      run: bazel test ... -s -c ${{matrix.build_type}}
