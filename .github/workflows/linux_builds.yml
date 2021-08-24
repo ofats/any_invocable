@@ -21,6 +21,7 @@ jobs:
         - g++-8
         - g++-9
         - g++-10
+        - clang++-4
         - clang++-6.0
         - clang++-7
         - clang++-8
