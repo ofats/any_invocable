@@ -4,7 +4,7 @@ One of possible implementations of std::any_invocable proposed in [P0288R5](http
 This paper proposes a conservative, move-only equivalent of std::function.
 
 ### Current build
-[![Build Status](https://travis-ci.org/ofats/any_invocable.svg?branch=master)](https://travis-ci.org/ofats/any_invocable)
+[![Linux build status](https://github.com/ofats/any_invocable/actions/workflows/linux_builds.yml/badge.svg)](https://github.com/ofats/any_invocable/actions/workflows/linux_builds.yml)
 
 ### Motivating Example
 Such a code:
