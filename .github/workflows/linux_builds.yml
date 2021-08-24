@@ -10,9 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -37,8 +35,6 @@ jobs:
           other_pkgs: g++-9
         - cxx: g++-10
           other_pkgs: g++-10
-        - cxx: clang++-4
-          other_pkgs: clang-6
         - cxx: clang++-6.0
           other_pkgs: clang-6.0
         - cxx: clang++-7
@@ -50,9 +46,12 @@ jobs:
         - cxx: clang++-10
           other_pkgs: clang-10
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - uses: actions/checkout@v2
+
+    - name: Prepare environment
+      run: sudo apt-get install -y ${{matrix.other_pkgs}}
+
     - uses: bazelbuild/setup-bazelisk@v1
 
     - name: Mount bazel cache  # Optional
