@@ -1,4 +1,4 @@
-name: macOS builds
+name: macOS and Windows builds
 
 on:
   push:
@@ -11,13 +11,12 @@ on:
 
 jobs:
   build:
-    runs-on: macos-11
     strategy:
       matrix:
-        cxx:
-        - g++-10
-        - clang++
+        os: [macos-latest, windows-latest]
         build_type: [opt, fastbuild]
+
+    runs-on: ${{matrix.os}}
 
     steps:
     - uses: actions/checkout@v2
@@ -25,11 +24,7 @@ jobs:
     - uses: bazelbuild/setup-bazelisk@v1
 
     - name: Bazel build
-      env:
-        CC: ${{matrix.cxx}}
       run: bazel build ... -s -c ${{matrix.build_type}}
 
     - name: Bazel test
-      env:
-        CC: ${{matrix.cxx}}
       run: bazel test ... -s -c ${{matrix.build_type}}
