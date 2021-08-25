@@ -11,12 +11,10 @@ on:
 
 jobs:
   build:
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: windows-latest
         build_type: [opt, fastbuild]
-
-    runs-on: ${{matrix.os}}
 
     steps:
     - uses: actions/checkout@v2

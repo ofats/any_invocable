@@ -11,12 +11,10 @@ on:
 
 jobs:
   build:
+    runs-on: macos-latest
     strategy:
       matrix:
-        os: macos-latest
         build_type: [opt, fastbuild]
-
-    runs-on: ${{matrix.os}}
 
     steps:
     - uses: actions/checkout@v2
