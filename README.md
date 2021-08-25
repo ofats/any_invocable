@@ -5,6 +5,8 @@ This paper proposes a conservative, move-only equivalent of std::function.
 
 ### Current build
 [![Linux build status](https://github.com/ofats/any_invocable/actions/workflows/linux_builds.yml/badge.svg)](https://github.com/ofats/any_invocable/actions/workflows/linux_builds.yml)
+[![macOS build status](https://github.com/ofats/any_invocable/actions/workflows/macos_builds.yml/badge.svg)](https://github.com/ofats/any_invocable/actions/workflows/macos_builds.yml)
+[![Windows build status](https://github.com/ofats/any_invocable/actions/workflows/windows_builds.yml/badge.svg)](https://github.com/ofats/any_invocable/actions/workflows/windows_builds.yml)
 
 ### Motivating Example
 Such a code:
