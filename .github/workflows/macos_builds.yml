@@ -1,0 +1,35 @@
+name: macOS builds
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-11
+    strategy:
+      matrix:
+        cxx:
+        - g++-10
+        - clang++
+        build_type: [opt, fastbuild]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: bazelbuild/setup-bazelisk@v1
+
+    - name: Bazel build
+      env:
+        CC: ${{matrix.cxx}}
+      run: bazel build ... -s -c ${{matrix.build_type}}
+
+    - name: Bazel test
+      env:
+        CC: ${{matrix.cxx}}
+      run: bazel test ... -s -c ${{matrix.build_type}}
