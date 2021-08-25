@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: windows-latest
         build_type: [opt, fastbuild]
 
     runs-on: ${{matrix.os}}
@@ -25,6 +25,8 @@ jobs:
 
     - name: Bazel build
       run: bazel build ... -s -c ${{matrix.build_type}}
+      shell: bash
 
     - name: Bazel test
       run: bazel test ... -s -c ${{matrix.build_type}}
+      shell: bash

@@ -1,0 +1,30 @@
+name: macOS and Windows builds
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: macos-latest
+        build_type: [opt, fastbuild]
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: bazelbuild/setup-bazelisk@v1
+
+    - name: Bazel build
+      run: bazel build ... -s -c ${{matrix.build_type}}
+
+    - name: Bazel test
+      run: bazel test ... -s -c ${{matrix.build_type}}
