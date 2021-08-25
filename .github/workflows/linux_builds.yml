@@ -35,6 +35,8 @@ jobs:
           other_pkgs: g++-9
         - cxx: g++-10
           other_pkgs: g++-10
+        - cxx: clang++-4
+          other_pkgs: clang-4
         - cxx: clang++-6.0
           other_pkgs: clang-6.0
         - cxx: clang++-7
@@ -54,15 +56,9 @@ jobs:
 
     - uses: bazelbuild/setup-bazelisk@v1
 
-      #- name: Mount bazel cache  # Optional
-      #  uses: actions/cache@v2
-      #  with:
-      #    path: "~/.cache/bazel"
-      #    key: bazel
-
     - name: Bazel build
       env:
-        CXX: ${{matrix.cxx}}
+        CC: ${{matrix.cxx}}
       run: bazel build ... -s -c ${{matrix.build_type}}
 
     - name: Bazel test
