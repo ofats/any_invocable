@@ -1,7 +1,21 @@
+package(default_visibility = ["//visibility:private"])
+
+config_setting(
+    name = "msvc_compiler",
+    flag_values = {
+        "@bazel_tools//tools/cpp:compiler": "msvc-cl",
+    },
+)
+
+DEFAULT_COPTS = select({
+    ":msvc_compiler": ["/std:c++17"],
+    "//conditions:default": ["-std=c++17"],
+})
+
 cc_library(
     name = "any_invocable",
     hdrs = ["include/ofats/invocable.h"],
-    copts = ["-std=c++17"],
+    copts = DEFAULT_COPTS,
     includes = ["include"],
     linkstatic = True,
     visibility = ["//visibility:public"],
@@ -10,9 +24,8 @@ cc_library(
 cc_test(
     name = "any_invocable_test",
     srcs = ["test/invocable_ut.cpp"],
-    copts = ["-std=c++17"],
+    copts = DEFAULT_COPTS,
     linkstatic = True,
-    visibility = ["//visibility:private"],
     deps = [
         ":any_invocable",
         "@catch2//:catch2_main",
