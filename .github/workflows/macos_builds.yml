@@ -25,7 +25,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: "~/.cache/bazel"
-        key: bazel
+        key: bazel-macos-${{matrix.build_type}}
 
     - name: Bazel build
       run: bazel build ... -s -c ${{matrix.build_type}}

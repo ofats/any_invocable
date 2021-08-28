@@ -57,7 +57,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: "~/.cache/bazel"
-        key: bazel
+        key: bazel-linux-${{matrix.cxx}}-${{matrix.build_type}}
 
     - name: Bazel build
       env:
