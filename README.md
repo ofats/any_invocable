@@ -1,5 +1,6 @@
 # any_invocable
-One of possible implementations of std::any_invocable proposed in [P0288R5](https://wg21.link/P0288R5).
+One of possible implementations of std::any_invocable proposed in
+[P0288R5](https://wg21.link/P0288R5).
 
 This paper proposes a conservative, move-only equivalent of std::function.
 
@@ -20,9 +21,7 @@ struct widget {
 };
 
 int main() {
-    std::function<void()> f = [w_ptr = std::make_unique<widget>()] {
-        ...
-    };
+    std::function<void()> f = [w_ptr = std::make_unique<widget>()] { /*...*/ };
 }
 ```
 Will result in:
@@ -33,7 +32,5 @@ In other words, we can't store move-only callables in `std::function`.
 
 At the same time such a code will work:
 ```c++
-std::any_invocable<void()> f = [w_ptr = std::make_unique<widget>()] {
-    ...
-};
+std::any_invocable<void()> f = [w_ptr = std::make_unique<widget>()] { /*...*/ };
 ```
