@@ -29,7 +29,7 @@ Will result in:
 ```
 error: use of deleted function ‘std::unique_ptr<_Tp, _Dp>::unique_ptr(const std::unique_ptr<_Tp, _Dp>&) [with _Tp = widget; _Dp = std::default_delete<widget>]
 ```
-In other words, we can't use std::function to store move-only callbacks or similar stuff.
+In other words, we can't store move-only callables in `std::function`.
 
 At the same time such a code will work:
 ```c++
