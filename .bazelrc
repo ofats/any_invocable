@@ -1,0 +1,9 @@
+# Treat all warnings as errors by default
+build --copt=-Werror
+# Use C++17 by default
+build --copt=-std=c++17
+# Use clang by default
+build --action_env=CC=clang
+build --action_env=CXX=clang++
+
+import %workspace%/bazel_rc/sanitizers.rc

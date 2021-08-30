@@ -1,6 +1,14 @@
 package(default_visibility = ["//visibility:private"])
 
 config_setting(
+    name = "clang_compiler",
+    flag_values = {
+        "@bazel_tools//tools/cpp:compiler": "clang",
+    },
+    visibility = [":__subpackages__"],
+)
+
+config_setting(
     name = "msvc_compiler",
     flag_values = {
         "@bazel_tools//tools/cpp:compiler": "msvc-cl",
@@ -8,8 +16,120 @@ config_setting(
 )
 
 DEFAULT_COPTS = select({
-    ":msvc_compiler": ["/std:c++17"],
-    "//conditions:default": ["-std=c++17"],
+    ":msvc_compiler": [
+        "/W3",
+        "/DNOMINMAX",
+        "/DWIN32_LEAN_AND_MEAN",
+        "/D_CRT_SECURE_NO_WARNINGS",
+        "/D_SCL_SECURE_NO_WARNINGS",
+        "/D_ENABLE_EXTENDED_ALIGNED_STORAGE",
+        "/bigobj",
+        "/wd4005",
+        "/wd4068",
+        "/wd4180",
+        "/wd4244",
+        "/wd4267",
+        "/wd4503",
+        "/wd4800",
+    ],
+    ":clang_compiler": [
+        "-Wall",
+        "-Wextra",
+        "-Wcast-qual",
+        "-Wconversion",
+        "-Wfloat-overflow-conversion",
+        "-Wfloat-zero-conversion",
+        "-Wfor-loop-analysis",
+        "-Wformat-security",
+        "-Wgnu-redeclared-enum",
+        "-Winfinite-recursion",
+        "-Winvalid-constexpr",
+        "-Wliteral-conversion",
+        "-Wmissing-declarations",
+        "-Woverlength-strings",
+        "-Wpointer-arith",
+        "-Wself-assign",
+        "-Wshadow-all",
+        "-Wstring-conversion",
+        "-Wtautological-overlap-compare",
+        "-Wundef",
+        "-Wuninitialized",
+        "-Wunreachable-code",
+        "-Wunused-comparison",
+        "-Wunused-local-typedefs",
+        "-Wunused-result",
+        "-Wvla",
+        "-Wwrite-strings",
+        "-Wno-float-conversion",
+        "-Wno-implicit-float-conversion",
+        "-Wno-implicit-int-float-conversion",
+        "-Wno-implicit-int-conversion",
+        "-Wno-shorten-64-to-32",
+        "-Wno-sign-conversion",
+        "-DNOMINMAX",
+    ],
+    "//conditions:default": [
+        "-Wall",
+        "-Wextra",
+        "-Wcast-qual",
+        "-Wconversion-null",
+        "-Wformat-security",
+        "-Wmissing-declarations",
+        "-Woverlength-strings",
+        "-Wpointer-arith",
+        "-Wundef",
+        "-Wunused-local-typedefs",
+        "-Wunused-result",
+        "-Wvarargs",
+        "-Wvla",
+        "-Wwrite-strings",
+        "-DNOMINMAX",
+    ],
+})
+
+TEST_COPTS = DEFAULT_COPTS + select({
+    ":msvc_compiler": [
+        "/wd4018",
+        "/wd4101",
+        "/wd4503",
+        "/wd4996",
+        "/DNOMINMAX",
+    ],
+    ":clang_compiler": [
+        "-Wno-c99-extensions",
+        "-Wno-deprecated-declarations",
+        "-Wno-missing-noreturn",
+        "-Wno-missing-prototypes",
+        "-Wno-missing-variable-declarations",
+        "-Wno-null-conversion",
+        "-Wno-shadow",
+        "-Wno-shift-sign-overflow",
+        "-Wno-sign-compare",
+        "-Wno-unused-function",
+        "-Wno-unused-member-function",
+        "-Wno-unused-parameter",
+        "-Wno-unused-private-field",
+        "-Wno-unused-template",
+        "-Wno-used-but-marked-unused",
+        "-Wno-zero-as-null-pointer-constant",
+        "-Wno-gnu-zero-variadic-macro-arguments",
+    ],
+    "//conditions:default": [
+        "-Wno-conversion-null",
+        "-Wno-deprecated-declarations",
+        "-Wno-missing-declarations",
+        "-Wno-sign-compare",
+        "-Wno-unused-function",
+        "-Wno-unused-parameter",
+        "-Wno-unused-private-field",
+    ],
+})
+
+DEFAULT_LINKOPTS = select({
+    ":msvc_compiler": [
+        "-ignore:4221",
+    ],
+    "//conditions:default": [],
 })
 
 cc_library(
@@ -17,6 +137,7 @@ cc_library(
     hdrs = ["include/ofats/invocable.h"],
     copts = DEFAULT_COPTS,
     includes = ["include"],
+    linkopts = DEFAULT_LINKOPTS,
     linkstatic = True,
     visibility = ["//visibility:public"],
 )
@@ -24,7 +145,8 @@ cc_library(
 cc_test(
     name = "any_invocable_test",
     srcs = ["test/invocable_ut.cpp"],
-    copts = DEFAULT_COPTS,
+    copts = TEST_COPTS,
+    linkopts = DEFAULT_LINKOPTS,
     linkstatic = True,
     deps = [
         ":any_invocable",

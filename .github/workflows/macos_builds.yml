@@ -27,8 +27,11 @@ jobs:
         path: "~/.cache/bazel"
         key: bazel-macos-${{matrix.build_type}}
 
-    - name: Bazel build
-      run: bazel build ... -s -c ${{matrix.build_type}}
-
-    - name: Bazel test
-      run: bazel test ... -s -c ${{matrix.build_type}}
+    - name: Bazel build and test
+      run: bazel
+        --noworkspace_rc
+        --bazelrc=bazel_rc/sanitizers.rc
+        test //... -s
+        -c ${{matrix.build_type}}
+        --copt=-Werror
+        --copt=-std=c++17

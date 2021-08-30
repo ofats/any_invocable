@@ -1,0 +1,22 @@
+# Address sanitizer config
+build:asan --copt=-fsanitize=address
+build:asan --copt=-fsanitize=float-divide-by-zero
+build:asan --copt=-fsanitize=nullability
+build:asan --copt=-fsanitize=undefined
+build:asan --copt=-fno-sanitize-blacklist
+build:asan --linkopt=-fsanitize=address
+build:asan --linkopt=-fsanitize-link-c++-runtime
+# TODO: figure out how useful these options are
+# build:asan --test_env=ASAN_SYMBOLIZER_PATH=/opt/llvm/clang/bin/llvm-symbolizer
+# build:asan --test_env=TZDIR=/abseil-cpp/absl/time/internal/cctz/testdata/zoneinfo
+# build:asan --test_env=UBSAN_OPTIONS=print_stacktrace=1
+# build:asan --test_env=UBSAN_SYMBOLIZER_PATH=/opt/llvm/clang/bin/llvm-symbolizer
+
+# Thread sanitizer config
+build:tsan --copt=-fsanitize=thread
+build:tsan --copt=-fno-sanitize-blacklist
+build:tsan --linkopt=-fsanitize=thread
+# TODO: figure out how useful these options are
+# build:tsan --test_env=TSAN_OPTIONS=report_atomic_races=0
+# build:tsan --test_env="SAN_SYMBOLIZER_PATH=/opt/llvm/clang/bin/llvm-symbolizer
+# build:tsan --test_env=TZDIR=/abseil-cpp/absl/time/internal/cctz/testdata/zoneinfo

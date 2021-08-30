@@ -59,12 +59,12 @@ jobs:
         path: "~/.cache/bazel"
         key: bazel-linux-${{matrix.cxx}}-${{matrix.build_type}}
 
-    - name: Bazel build
-      env:
-        CC: ${{matrix.cxx}}
-      run: bazel build ... -s -c ${{matrix.build_type}}
-
-    - name: Bazel test
-      env:
-        CC: ${{matrix.cxx}}
-      run: bazel test ... -s -c ${{matrix.build_type}}
+    - name: Bazel build and test
+      run: bazel
+        --noworkspace_rc
+        --bazelrc=bazel_rc/sanitizers.rc
+        test //... -s
+        -c ${{matrix.build_type}}
+        --copt=-Werror
+        --copt=-std=c++17
+        --action_env=CC=${{matrix.cxx}}
