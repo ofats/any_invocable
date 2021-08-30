@@ -31,7 +31,7 @@ jobs:
       run: bazel
         --noworkspace_rc
         --bazelrc=bazel_rc/sanitizers.rc
-        test ////... -s
+        test ///... -s
         -c ${{matrix.build_type}}
         --copt=/std:c++17
       shell: bash
