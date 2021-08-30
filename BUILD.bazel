@@ -62,12 +62,12 @@ DEFAULT_COPTS = select({
         "-Wwrite-strings",
         "-Wno-float-conversion",
         "-Wno-implicit-float-conversion",
-        # TODO: make it work on newer compiler
-        # "-Wno-implicit-int-float-conversion",
+        "-Wno-implicit-int-float-conversion",
         "-Wno-implicit-int-conversion",
         "-Wno-shorten-64-to-32",
         "-Wno-sign-conversion",
         "-DNOMINMAX",
+        "-Wno-unknown-warning-option",
     ],
     "//conditions:default": [
         "-Wall",
