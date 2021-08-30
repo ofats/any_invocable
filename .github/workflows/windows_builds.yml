@@ -30,7 +30,6 @@ jobs:
     - name: Bazel build and test
       run: bazel
         --noworkspace_rc
-        --bazelrc=bazel_rc/sanitizers.rc
         test ///... -s
         -c ${{matrix.build_type}}
         --copt=/std:c++17
