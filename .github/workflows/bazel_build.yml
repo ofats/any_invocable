@@ -10,59 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: macOS build
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        build_type: [opt, fastbuild]
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: bazelbuild/setup-bazelisk@v1
-
-      - name: Mount bazel cache
-        uses: actions/cache@v2
-        with:
-          path: "~/.cache/bazel"
-          key: bazel-macos-${{matrix.build_type}}
-
-      - name: Bazel build and test
-        run: bazel
-          --noworkspace_rc
-          test //... -s
-          -c ${{matrix.build_type}}
-          --copt=-Werror
-          --copt=-std=c++17
-
-  build:
-    name: Windows build
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        build_type: [opt, fastbuild]
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: bazelbuild/setup-bazelisk@v1
-
-      - name: Mount bazel cache
-        uses: actions/cache@v2
-        with:
-          path: "~/.cache/bazel"
-          key: bazel-win-${{matrix.build_type}}
-
-      - name: Bazel build and test
-        run: bazel
-          --noworkspace_rc
-          test ///... -s
-          -c ${{matrix.build_type}}
-          --copt=/std:c++17
-        shell: bash
-
-  build:
+  build-linux:
     name: Linux build
     runs-on: ubuntu-20.04
     strategy:
@@ -121,3 +69,55 @@ jobs:
         --copt=-Werror
         --copt=-std=c++17
         --action_env=CC=${{matrix.cxx}}
+
+  build-macos:
+    name: macOS build
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        build_type: [opt, fastbuild]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: "~/.cache/bazel"
+          key: bazel-macos-${{matrix.build_type}}
+
+      - name: Bazel build and test
+        run: bazel
+          --noworkspace_rc
+          test //... -s
+          -c ${{matrix.build_type}}
+          --copt=-Werror
+          --copt=-std=c++17
+
+  build-win:
+    name: Windows build
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build_type: [opt, fastbuild]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: "~/.cache/bazel"
+          key: bazel-win-${{matrix.build_type}}
+
+      - name: Bazel build and test
+        run: bazel
+          --noworkspace_rc
+          test ///... -s
+          -c ${{matrix.build_type}}
+          --copt=/std:c++17
+        shell: bash
