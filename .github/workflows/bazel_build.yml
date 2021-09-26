@@ -17,25 +17,24 @@ jobs:
       matrix:
         build_type: [opt, fastbuild]
 
-        steps:
-          - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-          - uses: bazelbuild/setup-bazelisk@v1
+      - uses: bazelbuild/setup-bazelisk@v1
 
-          - name: Mount bazel cache
-            uses: actions/cache@v2
-            with:
-              path: "~/.cache/bazel"
-              key: bazel-macos-${{matrix.build_type}}
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: "~/.cache/bazel"
+          key: bazel-macos-${{matrix.build_type}}
 
-          - name: Bazel build and test
-            run: bazel
-              --noworkspace_rc
-              test //... -s
-              -c ${{matrix.build_type}}
-              --copt=-Werror
-              --copt=-std=c++17
-
+      - name: Bazel build and test
+        run: bazel
+          --noworkspace_rc
+          test //... -s
+          -c ${{matrix.build_type}}
+          --copt=-Werror
+          --copt=-std=c++17
 
   build:
     name: Windows build
@@ -44,24 +43,24 @@ jobs:
       matrix:
         build_type: [opt, fastbuild]
 
-        steps:
-          - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-          - uses: bazelbuild/setup-bazelisk@v1
+      - uses: bazelbuild/setup-bazelisk@v1
 
-          - name: Mount bazel cache
-            uses: actions/cache@v2
-            with:
-              path: "~/.cache/bazel"
-              key: bazel-win-${{matrix.build_type}}
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: "~/.cache/bazel"
+          key: bazel-win-${{matrix.build_type}}
 
-          - name: Bazel build and test
-            run: bazel
-              --noworkspace_rc
-              test ///... -s
-              -c ${{matrix.build_type}}
-              --copt=/std:c++17
-            shell: bash
+      - name: Bazel build and test
+        run: bazel
+          --noworkspace_rc
+          test ///... -s
+          -c ${{matrix.build_type}}
+          --copt=/std:c++17
+        shell: bash
 
   build:
     name: Linux build
