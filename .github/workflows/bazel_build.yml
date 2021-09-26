@@ -30,11 +30,11 @@ jobs:
 
           - name: Bazel build and test
             run: bazel
-            --noworkspace_rc
-            test //... -s
-            -c ${{matrix.build_type}}
-            --copt=-Werror
-            --copt=-std=c++17
+              --noworkspace_rc
+              test //... -s
+              -c ${{matrix.build_type}}
+              --copt=-Werror
+              --copt=-std=c++17
 
 
   build:
@@ -57,10 +57,10 @@ jobs:
 
           - name: Bazel build and test
             run: bazel
-            --noworkspace_rc
-            test ///... -s
-            -c ${{matrix.build_type}}
-            --copt=/std:c++17
+              --noworkspace_rc
+              test ///... -s
+              -c ${{matrix.build_type}}
+              --copt=/std:c++17
             shell: bash
 
   build:
