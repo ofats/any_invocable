@@ -144,12 +144,12 @@ TEST_CASE("Assignment", "[any_invocable]") {
   }
 
   SECTION("Assignment of member function pointer") {
-    ofats::any_invocable<int(widget*)> f;
-    require_empty(f);
-    f = &widget::boo;
-    require_non_empty(f);
+    ofats::any_invocable<int(widget*)> f_w;
+    require_empty(f_w);
+    f_w = &widget::boo;
+    require_non_empty(f_w);
     widget w;
-    REQUIRE(f(&w) == foo());
+    REQUIRE(f_w(&w) == foo());
   }
 
   SECTION("Assignment of reference wrapper") {
@@ -223,7 +223,43 @@ TEST_CASE("Swap and comparisons", "[any_invocable]") {
 TEST_CASE("Static checks", "[any_invocable]") {
   STATIC_REQUIRE(!std::is_copy_constructible_v<ofats::any_invocable<void()>>);
   STATIC_REQUIRE(std::is_move_constructible_v<ofats::any_invocable<void()>>);
+
+  // const qualifier
+  {
+    ofats::any_invocable<int()> f = [] { return 5; };
+    REQUIRE(f() == 5);
+  }
+  {
+    ofats::any_invocable<int() const> f = [] { return 5; };
+    REQUIRE(f() == 5);
+  }
+  {
+    const ofats::any_invocable<int() const> f = [] { return 5; };
+    REQUIRE(f() == 5);
+  }
+  STATIC_REQUIRE(!std::is_invocable_v<const ofats::any_invocable<void()>>);
+
+  // l-value qualifier
+  {
+    ofats::any_invocable<int()&> f = [] { return 5; };
+    STATIC_REQUIRE(!std::is_invocable_v<decltype(f)>);
+    REQUIRE(f() == 5);
+    STATIC_REQUIRE(!std::is_invocable_v<decltype(std::move(f))>);
+  }
+
+  // r-value qualifier
+  {
+    ofats::any_invocable<int()&&> f = [] { return 5; };
+    STATIC_REQUIRE(!std::is_invocable_v<decltype(f)&>);
+    REQUIRE(std::move(f)() == 5);
+    REQUIRE(ofats::any_invocable<int() &&>([] { return 5; })() == 5);
+  }
+
+  // noexcept qualifier
+  STATIC_REQUIRE(
+      std::is_nothrow_invocable_v<ofats::any_invocable<void() noexcept>>);
+  STATIC_REQUIRE(!std::is_nothrow_invocable_v<ofats::any_invocable<void()>>);
 }
 
-// TODO(ofats): small vs. large tests, number of move,ctor,dtor test,
-// ill/well-formed checks...
+// TODO(ofats): small vs. large tests, number of move,ctor,dtor test, full
+// qualifiers matrix test
