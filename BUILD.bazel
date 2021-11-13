@@ -88,44 +88,6 @@ DEFAULT_COPTS = select({
     ],
 })
 
-TEST_COPTS = DEFAULT_COPTS + select({
-    ":msvc_compiler": [
-        "/wd4018",
-        "/wd4101",
-        "/wd4503",
-        "/wd4996",
-        "/DNOMINMAX",
-    ],
-    ":clang_compiler": [
-        "-Wno-c99-extensions",
-        "-Wno-deprecated-declarations",
-        "-Wno-missing-noreturn",
-        "-Wno-missing-prototypes",
-        "-Wno-missing-variable-declarations",
-        "-Wno-null-conversion",
-        "-Wno-shadow",
-        "-Wno-shift-sign-overflow",
-        "-Wno-sign-compare",
-        "-Wno-unused-function",
-        "-Wno-unused-member-function",
-        "-Wno-unused-parameter",
-        "-Wno-unused-private-field",
-        "-Wno-unused-template",
-        "-Wno-used-but-marked-unused",
-        "-Wno-zero-as-null-pointer-constant",
-        "-Wno-gnu-zero-variadic-macro-arguments",
-    ],
-    "//conditions:default": [
-        "-Wno-conversion-null",
-        "-Wno-deprecated-declarations",
-        "-Wno-missing-declarations",
-        "-Wno-sign-compare",
-        "-Wno-unused-function",
-        "-Wno-unused-parameter",
-        "-Wno-unused-private-field",
-    ],
-})
-
 DEFAULT_LINKOPTS = select({
     ":msvc_compiler": [
         "-ignore:4221",
@@ -146,7 +108,7 @@ cc_library(
 cc_test(
     name = "any_invocable_test",
     srcs = ["test/invocable_ut.cpp"],
-    copts = TEST_COPTS,
+    copts = DEFAULT_COPTS,
     linkopts = DEFAULT_LINKOPTS,
     linkstatic = True,
     deps = [

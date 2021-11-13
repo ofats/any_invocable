@@ -103,9 +103,10 @@ struct handler_traits {
       destroy(src);
     }
 
-    static R call(storage& s, ArgTypes... args) {
-      return std::invoke(*static_cast<T*>(static_cast<void*>(&s.buf_)),
-                         std::forward<ArgTypes>(args)...);
+    static R call(const storage& s, ArgTypes... args) {
+      return std::invoke(
+          *static_cast<T*>(static_cast<void*>(&const_cast<storage&>(s).buf_)),
+          std::forward<ArgTypes>(args)...);
     }
   };
 
@@ -122,7 +123,7 @@ struct handler_traits {
       dst.ptr_ = src.ptr_;
     }
 
-    static R call(storage& s, ArgTypes... args) {
+    static R call(const storage& s, ArgTypes... args) {
       return std::invoke(*static_cast<T*>(s.ptr_),
                          std::forward<ArgTypes>(args)...);
     }
@@ -152,7 +153,7 @@ class any_invocable_impl {
   using action = any_detail::action;
   using handle_func = void (*)(any_detail::action, any_detail::storage*,
                                any_detail::storage*);
-  using call_func = R (*)(any_detail::storage&, ArgTypes...);
+  using call_func = R (*)(const any_detail::storage&, ArgTypes...);
 
  public:
   using result_type = R;
@@ -217,7 +218,7 @@ class any_invocable_impl {
     }
   }
 
-  R call(ArgTypes... args) noexcept(is_noexcept) {
+  R call(ArgTypes... args) const noexcept(is_noexcept) {
     return call_(storage_, std::forward<ArgTypes>(args)...);
   }
 
@@ -263,7 +264,7 @@ class any_invocable;
 
 #define __OFATS_ANY_INVOCABLE(cv, ref, noex, inv_quals)                        \
   template <class R, class... ArgTypes>                                        \
-  class any_invocable<R(ArgTypes...) cv ref noexcept(noex)>                    \
+  class any_invocable<R(ArgTypes...) cv ref noexcept(noex)> final              \
       : public any_detail::any_invocable_impl<R, noex, ArgTypes...> {          \
     using base_type = any_detail::any_invocable_impl<R, noex, ArgTypes...>;    \
                                                                                \
